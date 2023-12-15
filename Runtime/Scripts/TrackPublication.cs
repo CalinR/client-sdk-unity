@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using LiveKit.Internal.FFIClients.Requests;
 using LiveKit.Proto;
 
 namespace LiveKit
@@ -45,13 +44,26 @@ namespace LiveKit
     {
         public new IRemoteTrack Track => base.Track as IRemoteTrack;
 
-        internal RemoteTrackPublication(TrackPublicationInfo info) : base(info) { }
+        internal RemoteTrackPublication(TrackPublicationInfo info) : base(info)
+        {
+        }
+
+        public void SetSubscribed(bool subscribed)
+        {
+            using var request = FFIBridge.Instance.NewRequest<SetSubscribedRequest>();
+            var setSubscribed = request.request;
+            setSubscribed.Subscribe = subscribed;
+            setSubscribed.PublicationHandle = (ulong)Track.Handle.DangerousGetHandle();
+            using var response = request.Send();
+        }
     }
 
     public sealed class LocalTrackPublication : TrackPublication
     {
         public new ILocalTrack Track => base.Track as ILocalTrack;
 
-        internal LocalTrackPublication(TrackPublicationInfo info) : base(info) { }
+        internal LocalTrackPublication(TrackPublicationInfo info) : base(info)
+        {
+        }
     }
 }
